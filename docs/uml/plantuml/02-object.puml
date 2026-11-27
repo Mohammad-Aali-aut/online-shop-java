@@ -1,0 +1,66 @@
+@startuml
+skinparam shadowing false
+
+object "user : User" as user {
+  id = "usr-customer"
+  role = CUSTOMER
+}
+object "deliveryAddress : Address" as address {
+  addressId = "addr-home-1"
+  title = "Home"
+  isDefault = true
+}
+object "cart : Cart" as cart {
+  cartId = "usr-customer"
+  userId = "usr-customer"
+  items = {}
+}
+object "order : Order" as order {
+  orderId = "ord-c2e151df-d8b1-48d7-b706-69d3521e27dc"
+  userId = "usr-customer"
+  status = PAID
+  itemsSubtotal = 2400000.00 IRR
+  discountAmount = 480000.00 IRR
+  shippingFee = 0.00 IRR
+}
+object "item : OrderItem" as item {
+  productId = "prod-15cec687-468e-467f-8f3b-ffa85a2dc4b2"
+  productName = "Clean Code: Handbook of Agile Software"
+  lineTotal = 2400000.00 IRR
+}
+object "product : Product" as product {
+  id = "prod-15cec687-468e-467f-8f3b-ffa85a2dc4b2"
+  name = "Clean Code: Handbook of Agile Software"
+  categoryId = "CAT-BOOKS"
+  availableStock = 48
+}
+object "tx : PaymentTransaction" as tx {
+  transactionId = "txn-4a6fb2eb-c309-4a4e-b6ff-58f6694ec33a"
+  orderId = "ord-c2e151df-d8b1-48d7-b706-69d3521e27dc"
+  method = ONLINE_GATEWAY
+  status = SUCCESS
+  referenceCode = "REF-F461A8F6"
+}
+object "quantity : Quantity" as quantity {
+  value = 2
+}
+object "unitPrice : Money" as unitPrice {
+  amount = 1200000.00
+  currency = "IRR"
+}
+object "payableAmount : Money" as payableAmount {
+  amount = 1920000.00
+  currency = "IRR"
+}
+
+user -- address : addresses
+user -[hidden]right- cart
+order -- address : deliveryAddress
+order -- item : items
+order -- tx : transactions
+order -- payableAmount : payableAmount
+tx -- payableAmount : amount
+item -- quantity : quantity
+item -- unitPrice : unitPrice
+product -- unitPrice : price
+@enduml

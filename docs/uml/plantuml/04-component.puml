@@ -1,0 +1,27 @@
+@startuml
+skinparam shadowing false
+
+component "Online Shop" as app {
+  component "org.example.Main" as Main
+  component "org.example.cli\norg.example.cli.menu" as cli
+  component "org.example.service" as services
+  component "org.example.model.entity\norg.example.model.vo\norg.example.model.enums" as model
+  component "org.example.exception" as exceptions
+  component "org.example.util.DataSeeder" as DataSeeder
+  component "org.example.util.PasswordUtil" as PasswordUtil
+}
+
+Main ..> cli : starts menus
+Main ..> services : constructs
+Main ..> model : types the maps
+Main ..> DataSeeder : seeds maps
+DataSeeder ..> services : adds products
+DataSeeder ..> model : creates seed data
+DataSeeder ..> PasswordUtil : hashes passwords
+cli ..> services : calls
+cli ..> model : reads and constructs values
+cli ..> exceptions : handles
+services ..> model : manages
+services ..> exceptions : throws
+services ..> PasswordUtil : hashes and verifies
+@enduml
