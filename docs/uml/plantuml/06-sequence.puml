@@ -34,7 +34,8 @@ note over orderService : Build OrderItem snapshots and apply the coupon.
 create participant "order : Order" as order
 orderService -> order : Order(orderId, targetUserId, orderItems,\ndeliveryAddress, subtotal, discount, shippingFee,\npayableAmount, LocalDateTime.now())
 note over orderService
-  Save checkoutSnapshots and put the PENDING Order in orderStore.
+  checkoutSnapshots.put(order.getOrderId(), List.copyOf(cart.getItems()))
+  orderStore.put(order.getOrderId(), order)
 end note
 orderService --> customerMenu : order
 deactivate orderService

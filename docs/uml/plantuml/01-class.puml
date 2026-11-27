@@ -295,6 +295,7 @@ package "org.example.util" as utilities {
 }
 
 package "org.example.exception" as exceptions {
+  abstract class ShopException
   class AuthenticationException
   class CategoryNotFoundException
   class DuplicateUserException
@@ -307,6 +308,127 @@ package "org.example.exception" as exceptions {
   class UnauthorizedActionException
   class UserNotFoundException
 }
+package "org.example.service.port" as ports {
+  interface CartRepository {
+    +findByUserId(userId : String) : Optional<Cart>
+    +getOrCreate(userId : String) : Cart
+    +save(cart : Cart) : void
+  }
+  interface CategoryRepository {
+    +findById(categoryId : String) : Optional<Category>
+    +findAll() : List<Category>
+    +save(category : Category) : void
+  }
+  interface CheckoutSnapshotRepository {
+    +saveSnapshot(orderId : String, items : List<CartItem>) : void
+    +removeSnapshot(orderId : String) : Optional<List<CartItem>>
+  }
+  interface CouponRepository {
+    +findByCode(code : String) : Optional<Coupon>
+    +save(coupon : Coupon) : void
+  }
+  interface CredentialRepository {
+    +savePasswordHash(userId : String, passwordHash : String) : void
+    +findPasswordHashByUserId(userId : String) : Optional<String>
+  }
+  interface IdGenerator {
+    +nextId(prefix : String) : String
+  }
+  interface OrderRepository {
+    +findById(orderId : String) : Optional<Order>
+    +findByUserId(userId : String) : List<Order>
+    +findAll() : List<Order>
+    +save(order : Order) : void
+  }
+  interface PasswordHasher {
+    +hash(rawPassword : String) : String
+    +matches(rawPassword : String, storedHash : String) : boolean
+  }
+  interface PasswordResetRepository {
+    +saveResetToken(userId : String, token : ResetToken) : void
+    +findResetToken(userId : String) : Optional<ResetToken>
+    +removeResetToken(userId : String) : void
+  }
+  class ResetToken <<record>> {
+    -tokenHash : String
+    -expiresAt : LocalDateTime
+  }
+  interface ProductRepository {
+    +findById(productId : String) : Optional<Product>
+    +findAll() : List<Product>
+    +save(product : Product) : void
+  }
+  interface ReviewRepository {
+    +addReview(review : Review) : void
+    +findByProductId(productId : String) : List<Review>
+  }
+  interface SessionRepository {
+    +saveSession(sessionToken : String, userId : String) : void
+    +findUserIdByToken(sessionToken : String) : Optional<String>
+    +removeSession(sessionToken : String) : void
+    +removeAllSessionsForUser(userId : String) : void
+  }
+  interface UserRepository {
+    +findById(userId : String) : Optional<User>
+    +findByIdentifier(identifier : String) : Optional<User>
+    +existsByEmail(email : String) : boolean
+    +existsByPhone(phone : String) : boolean
+    +existsByPhoneExcludingUser(phone : String, excludedUserId : String) : boolean
+    +save(user : User) : void
+    +findAll() : List<User>
+  }
+  interface VerificationCodeGenerator {
+    +nextSixDigitCode() : String
+  }
+}
+
+package "org.example.infrastructure.persistence" as persistence {
+  class InMemoryCartRepository {
+    -store : Map<String, Cart>
+  }
+  class InMemoryCategoryRepository {
+    -store : Map<String, Category>
+  }
+  class InMemoryCheckoutSnapshotRepository {
+    -store : Map<String, List<CartItem>>
+  }
+  class InMemoryCouponRepository {
+    -store : Map<String, Coupon>
+  }
+  class InMemoryCredentialRepository {
+    -store : Map<String, String>
+  }
+  class InMemoryOrderRepository {
+    -store : Map<String, Order>
+  }
+  class InMemoryPasswordResetRepository {
+    -store : Map<String, ResetToken>
+  }
+  class InMemoryProductRepository {
+    -store : Map<String, Product>
+  }
+  class InMemoryReviewRepository {
+    -store : Map<String, List<Review>>
+  }
+  class InMemorySessionRepository {
+    -store : Map<String, String>
+  }
+  class InMemoryUserRepository {
+    -store : Map<String, User>
+  }
+  class RepositoryPreconditions {
+    {static} ~requireNonBlank(value : String, fieldName : String) : String
+  }
+}
+
+package "org.example.infrastructure.security" as security {
+  class RandomVerificationCodeGenerator {
+    -random : SecureRandom
+  }
+  class Sha256PasswordHasher
+  class UuidIdGenerator
+}
+
 class RuntimeException <<JDK>>
 class IllegalArgumentException <<JDK>>
 
@@ -357,16 +479,51 @@ OrderItem "0..*" --> "1" Money : unitPrice
 OrderItem "0..*" --> "1" Quantity : quantity
 PaymentTransaction "0..*" --> "1" Money : amount
 
+ShopException -right-|> RuntimeException
 IllegalArgumentException -right-|> RuntimeException
-AuthenticationException -right-|> RuntimeException
-CategoryNotFoundException -right-|> RuntimeException
-DuplicateUserException -right-|> IllegalArgumentException
-InsufficientStockException -right-|> RuntimeException
-InvalidCouponException -right-|> RuntimeException
+AuthenticationException -right-|> ShopException
+CategoryNotFoundException -right-|> ShopException
+DuplicateUserException -right-|> ShopException
+InsufficientStockException -right-|> ShopException
+InvalidCouponException -right-|> ShopException
 InvalidInputException -right-|> IllegalArgumentException
-InvalidOrderStateException -right-|> RuntimeException
-OrderNotFoundException -right-|> RuntimeException
-ProductNotFoundException -right-|> RuntimeException
-UnauthorizedActionException -right-|> RuntimeException
-UserNotFoundException -right-|> RuntimeException
+InvalidOrderStateException -right-|> ShopException
+OrderNotFoundException -right-|> ShopException
+ProductNotFoundException -right-|> ShopException
+UnauthorizedActionException -right-|> ShopException
+UserNotFoundException -right-|> ShopException
+PasswordResetRepository +-- ResetToken
+InMemoryCartRepository .right.|> CartRepository
+InMemoryCategoryRepository .right.|> CategoryRepository
+InMemoryCheckoutSnapshotRepository .right.|> CheckoutSnapshotRepository
+InMemoryCouponRepository .right.|> CouponRepository
+InMemoryCredentialRepository .right.|> CredentialRepository
+InMemoryOrderRepository .right.|> OrderRepository
+InMemoryPasswordResetRepository .right.|> PasswordResetRepository
+InMemoryProductRepository .right.|> ProductRepository
+InMemoryReviewRepository .right.|> ReviewRepository
+InMemorySessionRepository .right.|> SessionRepository
+InMemoryUserRepository .right.|> UserRepository
+RandomVerificationCodeGenerator .right.|> VerificationCodeGenerator
+Sha256PasswordHasher .right.|> PasswordHasher
+UuidIdGenerator .right.|> IdGenerator
+CartRepository -[hidden]down- CheckoutSnapshotRepository
+InMemoryCartRepository -[hidden]down- InMemoryCheckoutSnapshotRepository
+CategoryRepository -[hidden]down- CouponRepository
+InMemoryCategoryRepository -[hidden]down- InMemoryCouponRepository
+CheckoutSnapshotRepository -[hidden]down- CredentialRepository
+InMemoryCheckoutSnapshotRepository -[hidden]down- InMemoryCredentialRepository
+CouponRepository -[hidden]down- OrderRepository
+InMemoryCouponRepository -[hidden]down- InMemoryOrderRepository
+CredentialRepository -[hidden]down- PasswordResetRepository
+InMemoryCredentialRepository -[hidden]down- InMemoryPasswordResetRepository
+OrderRepository -[hidden]down- ProductRepository
+InMemoryOrderRepository -[hidden]down- InMemoryProductRepository
+PasswordResetRepository -[hidden]down- ReviewRepository
+InMemoryPasswordResetRepository -[hidden]down- InMemoryReviewRepository
+ProductRepository -[hidden]down- SessionRepository
+InMemoryProductRepository -[hidden]down- InMemorySessionRepository
+ReviewRepository -[hidden]down- UserRepository
+InMemoryReviewRepository -[hidden]down- InMemoryUserRepository
+Sha256PasswordHasher ..> PasswordUtil
 @enduml

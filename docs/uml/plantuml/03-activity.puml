@@ -37,11 +37,11 @@ endif
 
 :Choose an address (0 for default)\nand enter an optional coupon;
 :OrderService.checkout(userId, addressId, couponCode)\nresolves the address and checks item availability,\nthen builds OrderItem snapshots and validates any coupon;
-if (Checkout validations pass?) then (yes)
+if (Checkout succeeds?) then (yes)
   :Store the cart snapshot in checkoutSnapshots\nand the PENDING Order in orderStore;
   :Show order summary;
 else (no)
-  :Print checkout error\nand return to CustomerMenu;
+  :Report the checkout error for an invalid address,\ncoupon, stock level or order state;
   stop
 endif
 

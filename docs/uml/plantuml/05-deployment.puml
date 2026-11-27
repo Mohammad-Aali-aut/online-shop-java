@@ -14,6 +14,8 @@ classes ..> app : <<manifest>>
 
 note right of classes
   org.example.Main is the entry point.
-  ConcurrentHashMap stores live in this JVM.
+  Main creates the in-memory stores at startup.
+  Repository and security implementations ship
+  in the same target/classes directory.
 end note
 @enduml

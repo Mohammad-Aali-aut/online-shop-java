@@ -16,7 +16,7 @@ object "cart : Cart" as cart {
   items = {}
 }
 object "order : Order" as order {
-  orderId = "ord-c2e151df-d8b1-48d7-b706-69d3521e27dc"
+  orderId = "ord-d977b530-56c1-4908-bcb2-c7dfff55f1c1"
   userId = "usr-customer"
   status = PAID
   itemsSubtotal = 2400000.00 IRR
@@ -24,22 +24,22 @@ object "order : Order" as order {
   shippingFee = 0.00 IRR
 }
 object "item : OrderItem" as item {
-  productId = "prod-15cec687-468e-467f-8f3b-ffa85a2dc4b2"
+  productId = "prod-d71ea488-da5b-4c55-a613-ab7060b55276"
   productName = "Clean Code: Handbook of Agile Software"
   lineTotal = 2400000.00 IRR
 }
 object "product : Product" as product {
-  id = "prod-15cec687-468e-467f-8f3b-ffa85a2dc4b2"
+  id = "prod-d71ea488-da5b-4c55-a613-ab7060b55276"
   name = "Clean Code: Handbook of Agile Software"
   categoryId = "CAT-BOOKS"
   availableStock = 48
 }
 object "tx : PaymentTransaction" as tx {
-  transactionId = "txn-4a6fb2eb-c309-4a4e-b6ff-58f6694ec33a"
-  orderId = "ord-c2e151df-d8b1-48d7-b706-69d3521e27dc"
+  transactionId = "txn-ae4130da-0bac-4124-98cd-d4b275aa42bb"
+  orderId = "ord-d977b530-56c1-4908-bcb2-c7dfff55f1c1"
   method = ONLINE_GATEWAY
   status = SUCCESS
-  referenceCode = "REF-F461A8F6"
+  referenceCode = "REF-8C2D9D56"
 }
 object "quantity : Quantity" as quantity {
   value = 2
